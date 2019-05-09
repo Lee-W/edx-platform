@@ -201,13 +201,17 @@ class ProgramCourseEnrollment(TimeStampedModel):  # pylint: disable=model-missin
                 check_access=True,
             )
         except AlreadyEnrolledError:
-            message = ("Attempted to create course enrollment for user={user} and course={course}"
-                       " but an enrollment already exists. Existing enrollment will be used instead")
-            logger.info(message.format(user=user.id, course=self.course_key))
-            self.course_enrollment = StudentCourseEnrollment.objects.get(
+            course_enrollment = StudentCourseEnrollment.objects.get(
                 user=user,
                 course_id=self.course_key,
             )
+            if course_enrollment.mode == CourseMode.AUDIT or course_enrollment.mode == CourseMode.HONOR:
+                course_enrollment.mode = CourseMode.MASTERS
+                course_enrollment.save()
+            self.course_enrollment = course_enrollment
+            message = ("Attempted to create course enrollment for user={user} and course={course}"
+                       " but an enrollment already exists. Existing enrollment will be used instead")
+            logger.info(message.format(user=user.id, course=self.course_key))
         if self.status == CourseEnrollmentResponseStatuses.INACTIVE:
             self.course_enrollment.deactivate()
         self.save()
