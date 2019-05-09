@@ -180,8 +180,6 @@ class ProgramCourseEnrollmentModelTests(TestCase):
                 ('lms.djangoapps.program_enrollments.models', 'WARNING', expected_message)
             )
 
-    import pytest
-    @pytest.mark.this
     def test_enroll_new_course_enrollment(self):
         program_course_enrollment = self._create_waiting_program_course_enrollment()
         program_course_enrollment.enroll(self.user)
